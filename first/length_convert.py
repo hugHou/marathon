@@ -1,22 +1,39 @@
 import re
 
-Length_Dic = {
-	'inches' : 0.0254,
-	'feet' : 0.3048,
-	'yards' : 0.9144,
-	'miles' : 1609.344,
-	'centimeters' : 0.01,
-	'meters' : 1,
-	'kilometers' : 1000
-}
+Length_Dic = {}
+
+CalculateExpress = []
+
+RULE_PATTERN = '([a-z]+) = ([0-9]+\.?[0-9]*)'
 
 PATTERN = re.compile('([-+]?[0-9]+\.?[0-9]*)([a-z]+)')
 
+def inputHandler():
+	isReadRule = True
+	inputFile = file('./input.txt', 'r')
+	for line in inputFile:
+		if line == '\n':
+			isReadRule = False
+			continue
+		if isReadRule:
+			ruleGroup = re.search(RULE_PATTERN, line)
+			if ruleGroup is not None:
+				Length_Dic[ruleGroup.group(1)] = float(ruleGroup.group(2))
+		else:
+			CalculateExpress.append(re.sub(r'\n*', '', line))
+	inputFile.closed
+
+
 def convertLength(lengthSet):
 	length = float(lengthSet[0])
-	unit = lengthSet[1]
-
-	length = Length_Dic[unit] * length
+	for key in Length_Dic.keys():
+		if lengthSet[1].rfind(key) >= 0:
+			length = Length_Dic[key] * length
+			break
+		elif 'feet' == lengthSet[1]:
+			print(Length_Dic['foot'])
+			length = Length_Dic['foot'] * length
+			break
 	return length
 
 def calculateExpress(expressStr):
@@ -35,13 +52,12 @@ def calculateExpress(expressStr):
 	return '%.2f m' % result
 
 def main():
+	inputHandler()
 	outputFile = open('./output.txt', 'w')
 	outputFile.writelines('yushio1984@gmail.com \n\n')
-	inputFile = file('./input.txt', 'r')
-	for line in inputFile:
+	for line in CalculateExpress:
 		outputFile.writelines('%s\n' % calculateExpress(line))
 	outputFile.closed
-	inputFile.closed
 
 if __name__ == '__main__':
 	main()
